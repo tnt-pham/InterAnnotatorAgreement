@@ -15,10 +15,11 @@ class Annotation:
         self.closing_bracket = closing_bracket
         self.annotated_indices = set()
         self.annotated_indices_groups = []
+        self.not_annotated_indices_groups = []
 
-        self.get_annotated_indices()
+        self.extract_indices()
 
-    def get_annotated_indices(self):
+    def extract_indices(self):
         """Get indices of annotated words."""
         in_brackets = False
         for num, word in enumerate(self.text_split):
@@ -31,6 +32,8 @@ class Annotation:
             if word.rstrip(",.;:-").endswith(self.closing_bracket):  # TODO: before comma or full stop
                 in_brackets = False
                 self.annotated_indices_groups.append(group)
+            elif not in_brackets:
+                self.not_annotated_indices_groups.append([num])
 
 
 if __name__ == "__main__":
@@ -39,3 +42,4 @@ if __name__ == "__main__":
     print(len(ao.text_split))
     print(ao.annotated_indices)
     print(ao.annotated_indices_groups)
+    print(ao.not_annotated_indices_groups)
