@@ -20,19 +20,19 @@ class Annotation:
         self.extract_indices()
 
     def extract_indices(self):
-        """Get indices of annotated words."""
+        """Get indices of annotated and not annotated words."""
         in_brackets = False
         for num, word in enumerate(self.text_split):
             if word.startswith(self.opening_bracket):
                 in_brackets = True
                 group = []
-            if in_brackets:
+            if in_brackets:  # annotated
                 self.annotated_indices.add(num)
                 group.append(num)
             if word.rstrip(",.;:-").endswith(self.closing_bracket):  # TODO: before comma or full stop
                 in_brackets = False
                 self.annotated_indices_groups.append(group)
-            elif not in_brackets:
+            elif not in_brackets:  # not annotated
                 self.not_annotated_indices_groups.append([num])
 
 

@@ -6,7 +6,6 @@
 # Windows 10
 """Ascertains similarity between two Annotation objects."""
 
-from nltk.tokenize import word_tokenize
 import re
 
 from annotation import Annotation
@@ -16,7 +15,7 @@ from errors import DifferentTextException
 class InterAnnotatorAgreement:
     def __init__(self, annotation_obj1, annotation_obj2):
         if len(annotation_obj1.text_split) != len(annotation_obj2.text_split):
-            raise DifferentTextException("Two Annotation objects are not compatible. Check the annotation guidelines please.")  # how to set brackets
+            raise DifferentTextException("Two Annotation objects are not compatible. Please check the annotation guidelines.")  # how to set brackets
 
         self.ao1 = annotation_obj1
         self.ao2 = annotation_obj2
@@ -56,7 +55,7 @@ class InterAnnotatorAgreement:
             return 0
         return score/max_score
 
-    def ngram_agreement(self, n=2):
+    def ngram_mean_accuracy(self, n=2):
         """Limitation: längere Texte (bekommen mit mehr Disagreement weniger Punkte?)"""
         annotated_acc1 = self.ngram_accuracy(self.ao1.annotated_indices_groups, self.ao2.annotated_indices_groups, n=n)
         not_annotated_acc1 = self.ngram_accuracy(self.ao1.not_annotated_indices_groups, self.ao2.not_annotated_indices_groups, n=n)
@@ -71,6 +70,9 @@ class InterAnnotatorAgreement:
             for j in range(i):  # shortens list from the left hand side  # 0, 1, 2, 3 // 0, 1, 2 // 0, 1 // 0
                 subgrams.append(ngram_indices[j:i])
         return subgrams  # [[4, 5, 6, 7], [5, 6, 7], [6, 7], [7], [4, 5, 6], [5, 6], [6], [4, 5], [5], [4]]
+
+    def levenshtein(self):
+        pass
 
 
 def find_context(text):
@@ -89,7 +91,6 @@ if __name__ == "__main__":
     data3 = "[Er geht zu Lisa]. [Niemand hat damit gerechnet, dass Laura dabei sein würde]. [Fatma ist entsetzt]. [Sie verließ augenblicklich den großen Raum], [als Peter seinen Mund öffnete]."
     data4 = "[Er] [geht] [zu] [Lisa]. [Niemand] [hat] [damit] [gerechnet], [dass] [Laura] [dabei] [sein] [würde]. [Fatma] [ist] [entsetzt]. [Sie] [verließ] [augenblicklich] [den] [großen] [Raum], [als] [Peter] [seinen] [Mund] [öffnete]."
     data5 = "[Er] geht zu Lisa. [Niemand hat] damit gerechnet, dass [Laura] dabei sein würde. [Fatma] ist entsetzt. [Sie] verließ augenblicklich [den großen Raum], als [Peter] [seinen Mund] öffnete."
-    # what about [der] [große] [Raum]
 
     # print("mit nltk word_tokenize:\n", word_tokenize(data1))
     # print("mit split:\n", data1.split())
@@ -111,21 +112,21 @@ if __name__ == "__main__":
     print(iaa.get_subgrams([5]))
     print(iaa.get_subgrams([5, 2]))
 
-    print("1 und 2:", iaa.ngram_agreement(n=2))
+    print("1 und 2:", iaa.ngram_mean_accuracy())
 
     ao3 = Annotation(data3)
     iaa1_3 = InterAnnotatorAgreement(ao1, ao3)
-    print("1 und 3:", iaa1_3.ngram_agreement(n=2))
+    print("1 und 3:", iaa1_3.ngram_mean_accuracy())
 
     iaa1_1 = InterAnnotatorAgreement(ao1, ao1)
-    print("1 und 1:", iaa1_1.ngram_agreement())
+    print("1 und 1:", iaa1_1.ngram_mean_accuracy())
 
     ao4 = Annotation(data4)
     iaa3_4 = InterAnnotatorAgreement(ao3, ao4)
-    print("3 und 4:", iaa3_4.ngram_agreement(n=2))
+    print("3 und 4:", iaa3_4.ngram_mean_accuracy())
     print(iaa3_4.ngram_accuracy(iaa3_4.ao1.annotated_indices_groups, iaa3_4.ao2.annotated_indices_groups))
     print(iaa3_4.ngram_accuracy(iaa3_4.ao2.annotated_indices_groups, iaa3_4.ao1.annotated_indices_groups))
 
     ao5 = Annotation(data5)
     iaa1_5 = InterAnnotatorAgreement(ao1, ao5)
-    print("1 und 5:", iaa1_5.ngram_agreement(n=2))
+    print("1 und 5:", iaa1_5.ngram_mean_accuracy())
