@@ -7,6 +7,7 @@
 """Command line manager."""
 
 import argparse
+import logging
 import sys
 
 from annotation import Annotation
