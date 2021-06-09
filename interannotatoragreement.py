@@ -22,7 +22,7 @@ class InterAnnotatorAgreement:  # or rather IAA
 
     def naive_count_agreement(self):
         same_in_bracket_count = len(self.ao1.annotated_indices.intersection(self.ao2.annotated_indices))
-        disagree_count = len(self.ao1.annotated_indices.union(self.ao2.annotated_indices)) - same_in_bracket_count
+        disagree_count = len(self.ao1.annotated_indices.symmetric_difference(self.ao2.annotated_indices))
         same_not_bracket_count = len(self.ao1.text_split) - same_in_bracket_count - disagree_count
         return same_in_bracket_count, same_not_bracket_count, disagree_count
 

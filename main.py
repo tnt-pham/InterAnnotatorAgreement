@@ -30,16 +30,20 @@ def configure_parser():
                                      epilog="The Readme and your logfile"
                                             " interannotatoragreement_log.log"
                                             " may also provide some helpful"
-                                            " information. Have fun!")
+                                            " information, especially on how"
+                                            " to annotate the texts."
+                                            " Have fun!")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-t", "--text",
                        nargs=2,
                        metavar="TEXT",
-                       help="Two text annotations to be compared.")
+                       help="Two text annotations to be compared."
+                            " Need to be the same texts.")
     group.add_argument("-f", "--file",
                        nargs=2,
                        metavar="FILE",
-                       help="Two files, with text annotations to be compared.")
+                       help="Two files, with text annotations to be compared."
+                            " Need to be the same texts.")
 
     parser.add_argument("--naive",
                         action="store_true",
@@ -47,12 +51,12 @@ def configure_parser():
                              " of having annotated a markable or not?")
     parser.add_argument("--ngram",
                         action="store_true",
-                        help="NGram similarity metric: How well do long"
-                             " annotations agree?")  #TODO: formulierung
+                        help="NGram similarity metric: How well do markable"
+                             " boundaries agree?")  #TODO: formulierung
     parser.add_argument("--levenshtein",
                         action="store_true",
-                        help="..."
-                             " ...")
+                        help="Levenshtein distance: How many changes are"
+                             " needed until both annotations are equal?")
 
     parser.add_argument("--encoding",
                         nargs=1,
@@ -100,7 +104,7 @@ def command_line_execution(args):
     if args.ngram:
         print("NGram Accuracy:", iaa.ngram_mean_accuracy())  # TODO: n=2?
     if args.levenshtein:
-        pass
+        print("Levenshtein Distance:", iaa.levenshtein(ao1.annotated_indices_groups, ao2.annotated_indices_groups))
     if not(args.naive or args.ngram or args.levenshtein):
         parser.error("Missing argument: --naive or --ngram or --levenshtein\n"
                      "Please choose depending on which metric(s) you want to"
