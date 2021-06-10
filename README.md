@@ -9,12 +9,21 @@ Annotating linguistic data can be an onerous task. Some try to automatically ann
 
 ### ANNOTATION GUIDELINES
 **Format:**  
-Possible annotation 1: [Er] geht zu [Lisa]. Niemand hat damit gerechnet, dass [Laura] dabei sein würde. [Fatma] ist entsetzt. [Sie] verließ augenblicklich [den großen Raum], als [Peter] [seinen Mund] öffnete.
+The brackets that are used to annotate the markables should be set around the markables, without inserting any whitespaces. The following examples are possible annotations:  
+A1: [Sie] verließ augenblicklich [den großen Raum], als [Peter] [seinen Mund] öffnete.  
+A2: Sie verließ augenblicklich [den] [großen] [Raum], als [Peter] [seinen Mund] öffnete.  
 
-only 2 same texts
+### METRICS
+**Naive:** Calculates the proportion of agreeing in-brackets as well as not-in-brackets and total number of tokens. = 10/11  
+    - Calculation: number_of_agreeing_annotations/ total_number_of_tokens = 10/11
+    - Limitation: Does not take into account the markable boundaries. `[den großen Raum]` and `[den] [großen] [Raum]` are treated the same.  
+**NGram:** Ascertains how well an annotation is compatible with a reference. Takes subset relations into account. The longer the agreeing markables, the higher the reward.  
+    - Calculation: Consider one annotation as the reference (later reverse the perspective and take mean value). Now compute: max_score = sum of the square numbers of the lengths of all reference markables. Then compute: score = sum of all the square numbers of the lengths of other annotation's markables IF the markable is also in the reference  or the markable is contained in a larger markable of the reference.
+    - Limitation: 
+**Levenshtein:**  
 
 ##  REQUIREMENTS
-- two annotations of the same text (as strings or in files)
+- two annotations of the **same text** (as strings or in files)
 
 ## SYNOPSIS
 - show command line syntax and more information on arguments
