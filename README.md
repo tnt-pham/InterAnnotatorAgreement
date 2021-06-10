@@ -19,12 +19,15 @@ A2: Sie verließ augenblicklich [den] [großen] [Raum], als [Peter] [seinen Mund
     - Value Range: from 0 (not similar) to 1 (most similar)  
     - Limitation: Does not take into account the markable boundaries. `[den großen Raum]` and `[den] [großen] [Raum]` are treated the same.  
 **NGram:** How well an annotation is compatible with a reference. Takes subset relations into account. The longer the agreeing markables, the higher the reward.  
-    - Calculation: Consider one annotation as the reference (later reverse the perspective and take mean value). Now compute: max_score = sum of the squares of the lengths of all reference markables. Then compute: score = sum of all the squares of the lengths of the other annotation's markables IF the markable is also in the reference  or the markable is contained in a larger reference markable. Calculate the ratio of score/max_score. Repeat the calculation with the reversed perspective, i.e. the 'other' annotation is the reference now and vice versa. Then repeat these two calculations, but this time each of the not-annotated tokens is a markable and the before-annotated markables are not-annotated tokens now. Average these 4 results and get the ngram-agreement, also called 'ngreement'.  
+    - Calculation: Consider one annotation as the reference. Now compute: max_score = sum of the squares of the lengths of all reference markables. Then compute: score = sum of all the squares of the lengths of the other annotation's markables IF the markable is also in the reference  or the markable is contained in a larger reference markable. Calculate the ratio of score/max_score. Repeat the calculation with the reversed perspective, i.e. the 'other' annotation is the reference now and vice versa. Then repeat these two calculations, but this time each of the not-annotated tokens is a markable and the before-annotated markables are not-annotated tokens now. Average these 4 results and get the ngram-agreement, also called 'ngreement'.  
     - Value Range: from 0 (not similar) to 1 (same)  
     - Limitation: Agreeing long markables can result in a high value although a lot of other short markables are annotated differently.
-**Levenshtein:** The number of editing operations until the two annotations are the same.  
-    - Calculation: Deleting a markable (= 1), adding  
-    - Value Range: Distance: from 0 (same) to infinity (not similar); Normalized: from 0 (same)
+**Levenshtein:** Distance: The number of editing operations until the two annotations are the same. Normalized: Number of editing operations per markable.  
+    - Calculation: Distance: Deleting/adding a pair of brackets (= 1), merge two markables (= 1). Normalized: distance/max(number of markables of one annotation, number of markables of other annotation)  
+    - Value Range: Distance: from 0 (same) to infinity (not similar); Normalized: from 0 (same) to 2 (not similar)
+    - Limitation: from `als [Peter] [seinen Mund]` to `als [Peter seinen] Mund` 2 edits (delete(Mund) + merge(Peter, seinen))  
+    but from `als [Peter] [seinen Mund]` to `als [Peter seinen] [Mund]` 3 edits (merge(Peter, seinen Mund) + delete(Mund) + add(Mund)) although intuitively more similar.
+    - Side note: Implementation can be improved and adjusted to this problem. Add 'demerge' operation (= 1) and substitute 'delete+add' (= 2).
 
 ##  REQUIREMENTS
 - two annotations of the **same text** (as strings or in files)
