@@ -26,7 +26,7 @@ A2: Sie verließ augenblicklich [den] [großen] [Raum], als [Peter] [seinen Mund
     - Calculation: Distance: Deleting/adding a pair of brackets (= 1), merge two markables (= 1). Normalized: distance/max(number of markables of one annotation, number of markables of other annotation)  
     - Value Range: Distance: from 0 (same) to infinity (not similar); Normalized: from 0 (same) to 2 (not similar)  
     - Limitation: from `als [Peter] [seinen Mund]` to `als [Peter seinen] Mund` 2 edits (delete(Mund) + merge(Peter, seinen))  
-    but from `als [Peter] [seinen Mund]` to `als [Peter seinen] [Mund]` 3 edits (merge(Peter, seinen Mund) + delete(Mund) + add(Mund)) although intuitively more similar.
+    but from `als [Peter] [seinen Mund]` to `als [Peter seinen] [Mund]` 3 edits (merge(Peter, seinen Mund) + delete(Mund) + add(Mund)) although intuitively more similar.  
     - Side note: Implementation can be improved and adjusted to this problem. Add 'demerge' operation (= 1) and substitute 'delete+add' (= 2).
 
 ##  REQUIREMENTS
