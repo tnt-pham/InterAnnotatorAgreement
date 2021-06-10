@@ -258,6 +258,8 @@ class InterAnnotatorAgreement:
                                      self.ao2.annotated_indices_groups)
         markable_count1 = len(self.ao1.annotated_indices_groups)
         markable_count2 = len(self.ao2.annotated_indices_groups)
+        if markable_count1 == 0 and markable_count2 == 0:
+            return 0, 0.0
         return distance, distance/max(markable_count1, markable_count2)
 
     @staticmethod
@@ -331,8 +333,8 @@ if __name__ == "__main__":
     print(f">>> text1 = '{text1}'")
     print(f">>> text2 = '{text2}'")
     print("But what if the texts are saved as files? No problem!")
-    print(f">>> fts1 = FileToString('{file_path1}')")
-    print(f">>> fts2 = FileToString('{file_path2}')")
+    print(f">>> fts1 = FileToString('{file_path1}', encoding='utf-8')")
+    print(f">>> fts2 = FileToString('{file_path2}', encoding='utf-8')")
     print(">>> text1 = fts1.text")
     print(">>> text2 = fts2.text")
     print("")
