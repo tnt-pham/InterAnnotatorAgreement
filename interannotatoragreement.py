@@ -38,6 +38,90 @@ class InterAnnotatorAgreement:
         self.ao1 = annotation_obj1
         self.ao2 = annotation_obj2
 
+    def naive_accuracy(self):
+        """Calculates the proportion of agreeing annotations.
+
+        Returns:
+            float: Proportion of agreeing annotations. Between 0 and 1.
+        """
+        (same_in_bracket,
+         same_not_bracket,
+         disagree) = self._naive_count_agreement()
+        return ((same_in_bracket + same_not_bracket)
+                / (same_in_bracket + same_not_bracket + disagree))
+
+    def mean_ngreement(self, n=2):
+        """Calculates the mean ngreement by treating each annotation
+        once as a reference.
+
+        Args:
+            n (int): Increasing n increases the reward for correctly
+                annotated long markables. Defaults to 2.
+
+        Returns:
+            float: Mean NGreement. Between 0 and 1.
+        """
+        annotated_acc1 = self._ngreement(self.ao1.annotated_indices_groups,
+                                         self.ao2.annotated_indices_groups,
+                                         n=n)
+        not_annotated_acc1 = self._ngreement(self.ao1.not_annotated_indices_groups,
+                                             self.ao2.not_annotated_indices_groups,
+                                             n=n)
+        annotated_acc2 = self._ngreement(self.ao2.annotated_indices_groups,
+                                         self.ao1.annotated_indices_groups,
+                                         n=n)
+        not_annotated_acc2 = self._ngreement(self.ao2.not_annotated_indices_groups,
+                                             self.ao1.not_annotated_indices_groups,
+                                             n=n)
+        # no markables are annotated at all
+        if (len(self.ao1.annotated_indices_groups) == 0
+            and len(self.ao2.annotated_indices_groups) == 0):
+            return 1.0
+        return (annotated_acc1 + annotated_acc2
+                + not_annotated_acc1 + not_annotated_acc2)/4
+
+    def levenshtein_incl_normalized(self):
+        """Normalizes levenshtein distance
+        by mean number of identified markables.
+
+        Returns:
+            tuple: 2-tuple consisting of absolute distance (int)
+                and normalization (float).
+        """
+        distance = self._levenshtein(self.ao1.annotated_indices_groups,
+                                     self.ao2.annotated_indices_groups)
+        markable_count1 = len(self.ao1.annotated_indices_groups)
+        markable_count2 = len(self.ao2.annotated_indices_groups)
+        if markable_count1 == 0 and markable_count2 == 0:
+            return 0, 0.0
+        return distance, distance/max(markable_count1, markable_count2)
+
+    @staticmethod
+    def get_subgrams(ngram):
+        """Creates power set (as list) of the ngram (= subgrams)
+            without empty list.
+        Example:
+            ngram = [4, 5, 6]
+            subgrams = [[4, 5, 6], [5, 6], [6], [4, 5], [5], [4]]
+
+        Args:
+            ngram (list): Represents ngram,
+                i.e. contains the corresponding indices (int).
+
+        Returns:
+            list: Contains subgrams (= lists of indices (int)).
+                First list is equivalent to full ngram.
+        """
+        subgrams = []
+        # shortens list from the right hand side
+        for i in range(len(ngram), 0, -1):
+            # shortens list from the left hand side
+            for j in range(i):
+                subgrams.append(ngram[j:i])
+        return subgrams
+
+# private methods #
+
     def _naive_count_agreement(self):
         """Counts how many tokens (orthographic words) are annotated/
         not annotated in both annotations equally, regardless of the
@@ -63,18 +147,6 @@ class InterAnnotatorAgreement:
                             - same_in_bracket
                             - disagree)
         return same_in_bracket, same_not_bracket, disagree
-
-    def naive_accuracy(self):
-        """Calculates the proportion of agreeing annotations.
-
-        Returns:
-            float: Proportion of agreeing annotations. Between 0 and 1.
-        """
-        (same_in_bracket,
-         same_not_bracket,
-         disagree) = self._naive_count_agreement()
-        return ((same_in_bracket + same_not_bracket)
-                / (same_in_bracket + same_not_bracket + disagree))
 
     def _ngreement(self, indice_groups_ref, indice_groups_comp, n=2):
         """NGram-based agreement.
@@ -119,60 +191,6 @@ class InterAnnotatorAgreement:
             return 0.0
         return score/max_score
 
-    def mean_ngreement(self, n=2):
-        """Calculates the mean ngreement by treating each annotation
-        once as a reference.
-
-        Args:
-            n (int): Increasing n increases the reward for correctly
-                annotated long markables. Defaults to 2.
-
-        Returns:
-            float: Mean NGreement. Between 0 and 1.
-        """
-        annotated_acc1 = self._ngreement(self.ao1.annotated_indices_groups,
-                                         self.ao2.annotated_indices_groups,
-                                         n=n)
-        not_annotated_acc1 = self._ngreement(self.ao1.not_annotated_indices_groups,
-                                             self.ao2.not_annotated_indices_groups,
-                                             n=n)
-        annotated_acc2 = self._ngreement(self.ao2.annotated_indices_groups,
-                                         self.ao1.annotated_indices_groups,
-                                         n=n)
-        not_annotated_acc2 = self._ngreement(self.ao2.not_annotated_indices_groups,
-                                             self.ao1.not_annotated_indices_groups,
-                                             n=n)
-        # no markables are annotated at all
-        if (len(self.ao1.annotated_indices_groups) == 0
-            and len(self.ao2.annotated_indices_groups) == 0):
-            return 1.0
-        return (annotated_acc1 + annotated_acc2
-                + not_annotated_acc1 + not_annotated_acc2)/4
-
-    @staticmethod
-    def get_subgrams(ngram):
-        """Creates power set (as list) of the ngram (= subgrams)
-            without empty list.
-        Example:
-            ngram = [4, 5, 6]
-            subgrams = [[4, 5, 6], [5, 6], [6], [4, 5], [5], [4]]
-
-        Args:
-            ngram (list): Represents ngram,
-                i.e. contains the corresponding indices (int).
-
-        Returns:
-            list: Contains subgrams (= lists of indices (int)).
-                First list is equivalent to full ngram.
-        """
-        subgrams = []
-        # shortens list from the right hand side
-        for i in range(len(ngram), 0, -1):
-            # shortens list from the left hand side
-            for j in range(i):
-                subgrams.append(ngram[j:i])
-        return subgrams
-
     def _levenshtein(self, indices_groups_ref, indices_groups_comp):
         """Computes levenshtein distance, the number of
         editing operations until both lists are equal.
@@ -205,8 +223,8 @@ class InterAnnotatorAgreement:
             return self._levenshtein(indices_groups_ref[1:],
                                      indices_groups_comp[1:])
         else:
-            if self.is_compatible(indices_groups_ref[0],
-                                  indices_groups_comp[0]):
+            if self._is_compatible(indices_groups_ref[0],
+                                   indices_groups_comp[0]):
                 # until this index, groups in comp can be transformed to ref
                 compatible_index_boundary_in_ref = (
                     self._find_compatible_index_boundary(
@@ -246,22 +264,6 @@ class InterAnnotatorAgreement:
                     return 1 + self._levenshtein(indices_groups_ref,
                                                  indices_groups_comp[1:])
 
-    def levenshtein_incl_normalized(self):
-        """Normalizes levenshtein distance
-        by mean number of identified markables.
-
-        Returns:
-            tuple: 2-tuple consisting of absolute distance (int)
-                and normalization (float).
-        """
-        distance = self._levenshtein(self.ao1.annotated_indices_groups,
-                                     self.ao2.annotated_indices_groups)
-        markable_count1 = len(self.ao1.annotated_indices_groups)
-        markable_count2 = len(self.ao2.annotated_indices_groups)
-        if markable_count1 == 0 and markable_count2 == 0:
-            return 0, 0.0
-        return distance, distance/max(markable_count1, markable_count2)
-
     @staticmethod
     def _transform_groups_cost(group_ref, indices_groups_comp):
         """Ascertains number of required editing operations."""
@@ -274,7 +276,7 @@ class InterAnnotatorAgreement:
         return add_delete_cost + merge_cost
 
     @staticmethod
-    def is_compatible(group_ref, group_comp):
+    def _is_compatible(group_ref, group_comp):
         """Checks whether the two groups share at least one index.
 
         Args:
