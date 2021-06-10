@@ -14,13 +14,17 @@ A1: [Sie] verließ augenblicklich [den großen Raum], als [Peter] [seinen Mund] 
 A2: Sie verließ augenblicklich [den] [großen] [Raum], als [Peter] [seinen Mund] öffnete.  
 
 ### METRICS
-**Naive:** Calculates the proportion of agreeing in-brackets as well as not-in-brackets and total number of tokens. = 10/11  
-    - Calculation: number_of_agreeing_annotations/ total_number_of_tokens = 10/11
+**Naive:** The proportion of agreeing in-brackets as well as not-in-brackets and total number of tokens. = 10/11  
+    - Calculation: number_of_agreeing_annotations/ total_number_of_tokens = 10/11  
+    - Value Range: from 0 (not similar) to 1 (most similar)  
     - Limitation: Does not take into account the markable boundaries. `[den großen Raum]` and `[den] [großen] [Raum]` are treated the same.  
-**NGram:** Ascertains how well an annotation is compatible with a reference. Takes subset relations into account. The longer the agreeing markables, the higher the reward.  
-    - Calculation: Consider one annotation as the reference (later reverse the perspective and take mean value). Now compute: max_score = sum of the square numbers of the lengths of all reference markables. Then compute: score = sum of all the square numbers of the lengths of other annotation's markables IF the markable is also in the reference  or the markable is contained in a larger markable of the reference.
-    - Limitation: 
-**Levenshtein:**  
+**NGram:** How well an annotation is compatible with a reference. Takes subset relations into account. The longer the agreeing markables, the higher the reward.  
+    - Calculation: Consider one annotation as the reference (later reverse the perspective and take mean value). Now compute: max_score = sum of the squares of the lengths of all reference markables. Then compute: score = sum of all the squares of the lengths of the other annotation's markables IF the markable is also in the reference  or the markable is contained in a larger reference markable. Calculate the ratio of score/max_score. Repeat the calculation with the reversed perspective, i.e. the 'other' annotation is the reference now and vice versa. Then repeat these two calculations, but this time each of the not-annotated tokens is a markable and the before-annotated markables are not-annotated tokens now. Average these 4 results and get the ngram-agreement, also called 'ngreement'.  
+    - Value Range: from 0 (not similar) to 1 (same)  
+    - Limitation: Agreeing long markables can result in a high value although a lot of other short markables are annotated differently.
+**Levenshtein:** The number of editing operations until the two annotations are the same.  
+    - Calculation: Deleting a markable (= 1), adding  
+    - Value Range: Distance: from 0 (same) to infinity (not similar); Normalized: from 0 (same)
 
 ##  REQUIREMENTS
 - two annotations of the **same text** (as strings or in files)
