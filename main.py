@@ -113,7 +113,7 @@ def command_line_execution(args):
     if args.levenshtein:
         dist, dist_normalized = iaa.levenshtein_incl_normalized()
         print(f"Levenshtein Distance: {dist}\n"
-              f"Normalized Levenshtein: {dist_normalized}")
+              f"Levenshtein Normalized: {dist_normalized}")
     if not(args.naive or args.ngram or args.levenshtein):
         parser.error("Missing argument: --naive or --ngram or --levenshtein\n"
                      "Please choose depending on which metric(s) you want to"
